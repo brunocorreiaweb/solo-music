@@ -57,9 +57,9 @@
                     </div>
                     
                     <div class="tempo-control">
-                        <label for="tempo-input">Tempo (BPM):</label>
-                        <input type="number" id="tempo-input" min="40" max="300" value="120" class="tempo-input">
-                        <span id="tempo-display">120</span>
+                        <label for="tempo-input">Speed:</label>
+                        <input type="range" id="tempo-input" min="40" max="300" value="100" class="tempo-input">
+                        <span id="tempo-display">100%</span>
                     </div>
                     
                     <div class="metronome-control">
@@ -228,11 +228,39 @@
         }
 
         .tempo-input {
-            width: 60px;
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 0.875rem;
+            width: 150px;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #3b82f6 0%, #3b82f6 calc((var(--value, 100) - 40) / 260 * 100%), #d1d5db calc((var(--value, 100) - 40) / 260 * 100%), #d1d5db 100%);
+        }
+
+        .tempo-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tempo-input::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tempo-input::-moz-range-track {
+            background: transparent;
+            border: none;
         }
 
         #tempo-display {
@@ -482,26 +510,12 @@
         }
 
         /**
-         * Play the lesson
+         * Toggle play/pause
          */
-        function playLesson() {
+        function togglePlayPause() {
             const api = getAlphaTabInstance();
-            if (api) {
-                api.play();
-                document.getElementById('btn-play').style.display = 'none';
-                document.getElementById('btn-pause').style.display = 'inline-block';
-            }
-        }
-
-        /**
-         * Pause the lesson
-         */
-        function pauseLesson() {
-            const api = getAlphaTabInstance();
-            if (api) {
-                api.pause();
-                document.getElementById('btn-play').style.display = 'inline-block';
-                document.getElementById('btn-pause').style.display = 'none';
+            if (api && typeof api.playPause === 'function') {
+                api.playPause();
             }
         }
 
@@ -510,24 +524,23 @@
          */
         function stopLesson() {
             const api = getAlphaTabInstance();
-            if (api) {
+            if (api && typeof api.stop === 'function') {
                 api.stop();
-                document.getElementById('btn-play').style.display = 'inline-block';
-                document.getElementById('btn-pause').style.display = 'none';
             }
         }
 
         /**
-         * Update tempo
+         * Update playback speed (tempo)
          */
-        function updateTempo(bpm) {
+        function updatePlaybackSpeed(percentage) {
             const api = getAlphaTabInstance();
-            if (api && api.tempo !== undefined) {
-                // Clamp BPM between 40 and 300
-                bpm = Math.max(40, Math.min(300, bpm));
-                api.tempo = bpm;
-                document.getElementById('tempo-input').value = bpm;
-                document.getElementById('tempo-display').textContent = bpm;
+            if (api) {
+                // Clamp percentage between 40 and 300
+                percentage = Math.max(40, Math.min(300, percentage));
+                // Convert percentage to multiplier (100% = 1.0, 50% = 0.5, etc.)
+                api.playbackSpeed = percentage / 100;
+                document.getElementById('tempo-input').value = percentage;
+                document.getElementById('tempo-display').textContent = percentage + '%';
             }
         }
 
@@ -537,8 +550,7 @@
         function toggleMetronome(enabled) {
             const api = getAlphaTabInstance();
             if (api && api.metronomeVolume !== undefined) {
-                // Simple metronome: set volume to 0 or default
-                api.metronomeVolume = enabled ? 0.5 : 0;
+                api.metronomeVolume = enabled ? 1 : 0;
             }
         }
 
@@ -546,22 +558,57 @@
          * Setup player controls
          */
         function setupPlayerControls() {
-            const playBtn = document.getElementById('btn-play');
+            const playPauseBtn = document.getElementById('btn-play');
             const pauseBtn = document.getElementById('btn-pause');
             const stopBtn = document.getElementById('btn-stop');
             const tempoInput = document.getElementById('tempo-input');
             const metronomeCheckbox = document.getElementById('metronome-toggle');
+            const api = getAlphaTabInstance();
 
-            if (playBtn) playBtn.addEventListener('click', playLesson);
-            if (pauseBtn) pauseBtn.addEventListener('click', pauseLesson);
-            if (stopBtn) stopBtn.addEventListener('click', stopLesson);
-            
+            if (!api) return;
+
+            // Listen to player state changes
+            if (api.playerStateChanged) {
+                api.playerStateChanged.on((args) => {
+                    // args.state: 0 = stopped/paused, 1 = playing
+                    if (args.state === 0) {
+                        playPauseBtn.style.display = 'inline-block';
+                        pauseBtn.style.display = 'none';
+                    } else {
+                        playPauseBtn.style.display = 'none';
+                        pauseBtn.style.display = 'inline-block';
+                    }
+                });
+            }
+
+            // Combined play/pause button
+            if (playPauseBtn) {
+                playPauseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    togglePlayPause();
+                });
+            }
+
+            if (pauseBtn) {
+                pauseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    togglePlayPause();
+                });
+            }
+
+            if (stopBtn) {
+                stopBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    stopLesson();
+                });
+            }
+
             if (tempoInput) {
                 tempoInput.addEventListener('change', (e) => {
-                    updateTempo(parseInt(e.target.value));
+                    updatePlaybackSpeed(parseInt(e.target.value));
                 });
                 tempoInput.addEventListener('input', (e) => {
-                    document.getElementById('tempo-display').textContent = e.target.value;
+                    document.getElementById('tempo-display').textContent = e.target.value + '%';
                 });
             }
 
@@ -578,8 +625,8 @@
         // Setup player controls when page loads
         window.addEventListener('load', () => {
             loadLesson();
-            // Give a small delay to ensure AlphaTab is initialized
-            setTimeout(setupPlayerControls, 500);
+            // Wait for AlphaTab to be initialized
+            setTimeout(setupPlayerControls, 1000);
         });
     </script>
 </body>
