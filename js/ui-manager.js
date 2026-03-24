@@ -384,11 +384,27 @@ class UIManager {
                 </div>
                 <div class="lesson-actions">
                     <button class="btn btn-primary" onclick="uiManager.showLessonEditor('${lesson.id}', '${courseId}')">Edit</button>
-                    <button class="btn btn-secondary" onclick="uiManager.showLessonDetail('${lesson.id}')">View</button>
+                    <button class="btn btn-secondary" onclick="uiManager.openLessonViewer('${lesson.id}')">View</button>
                     <button class="btn btn-danger" onclick="uiManager.confirmDeleteLesson('${lesson.id}', '${courseId}')">Delete</button>
                 </div>
             </div>
         `).join('');
+    }
+
+    /**
+     * Open lesson in new tab/window
+     */
+    openLessonViewer(lessonId) {
+        const width = 1000;
+        const height = 800;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+        
+        window.open(
+            `lesson.html?id=${lessonId}`,
+            'lessonViewer',
+            `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+        );
     }
 
     /**

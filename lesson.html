@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Music - Lesson Viewer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- AlphaTab -->
+    <script src="https://cdn.jsdelivr.net/npm/alphatab@latest/dist/alphatab.js"></script>
+    
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="lesson-viewer-container">
+        <!-- Header with back button -->
+        <div class="lesson-viewer-header">
+            <button class="btn btn-secondary" onclick="window.close(); return false;">← Back</button>
+            <h1 id="lesson-title">Loading...</h1>
+            <div id="lesson-header-actions">
+                <!-- Filled by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Main lesson content -->
+        <div class="lesson-viewer-content">
+            <!-- Course info -->
+            <div class="lesson-info-box">
+                <small id="course-name" style="color: #666;">Course: Loading...</small>
+            </div>
+
+            <!-- Description -->
+            <div id="lesson-description-section" class="lesson-section">
+                <h2>Description</h2>
+                <p id="lesson-description">Loading...</p>
+            </div>
+
+            <!-- Video -->
+            <div id="lesson-video-section" class="lesson-section" style="display: none;">
+                <h2>Video Reference</h2>
+                <p><a id="lesson-video-link" href="#" target="_blank">Watch on YouTube</a></p>
+            </div>
+
+            <!-- AlphaTex notation -->
+            <div id="lesson-alphatab-section" class="lesson-section" style="display: none;">
+                <h2>Music Notation</h2>
+                <div id="lesson-alphatab-container" class="alphatab-preview">
+                    <div id="lesson-alphatab" style="background-color: #f5f5f5; padding: 1.5rem; border-radius: 6px; border: 1px solid #e5e7eb; min-height: 400px; width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div id="lesson-notes-section" class="lesson-section" style="display: none;">
+                <h2>Notes</h2>
+                <p id="lesson-notes">Loading...</p>
+            </div>
+
+            <!-- Progress section -->
+            <div class="lesson-section">
+                <h2>Progress</h2>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <p><strong>Status:</strong> <span id="lesson-status">Not completed</span></p>
+                    </div>
+                    <button id="btn-toggle-complete" class="btn btn-primary">Mark as Completed</button>
+                </div>
+                
+                <!-- Course progress display -->
+                <div style="background-color: #f9fafb; padding: 1rem; border-radius: 6px; border: 1px solid #e5e7eb;">
+                    <h3 style="margin-top: 0;">Course Progress</h3>
+                    <p id="course-progress-text">Loading...</p>
+                    <div style="background-color: white; padding: 0.75rem; border-radius: 4px; margin-top: 0.75rem;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">
+                            <span id="progress-fraction">0/0</span> lessons completed
+                        </div>
+                        <div class="progress-bar" style="height: 8px;">
+                            <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="lesson-actions" style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <button class="btn btn-secondary" onclick="window.close(); return false;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container"></div>
+
+    <style>
+        .lesson-viewer-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+
+        .lesson-viewer-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        .lesson-viewer-header h1 {
+            flex: 1;
+            margin: 0;
+            font-size: 1.875rem;
+        }
+
+        #lesson-header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lesson-viewer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .lesson-info-box {
+            background-color: #f0f9ff;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 2rem;
+        }
+
+        .lesson-section {
+            margin-bottom: 2rem;
+        }
+
+        .lesson-section h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+
+        .lesson-section h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            color: #374151;
+        }
+
+        .lesson-section p {
+            line-height: 1.6;
+            color: #4b5563;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .lesson-actions {
+            padding: 2rem 0;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        #lesson-alphatab-container {
+            background-color: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            max-height: 600px;
+            overflow: auto;
+        }
+
+        @media (max-width: 768px) {
+            .lesson-viewer-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .lesson-viewer-header h1 {
+                flex: none;
+                width: 100%;
+            }
+
+            .lesson-viewer-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+
+    <!-- Data Manager and other managers -->
+    <script src="js/data-manager.js"></script>
+    <script src="js/course-manager.js"></script>
+    <script src="js/lesson-manager.js"></script>
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/alphatab-renderer.js"></script>
+
+    <script>
+        /**
+         * Load lesson from URL parameter
+         */
+        function getLessonIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        /**
+         * Show toast notification
+         */
+        function showToast(message, type = 'info') {
+            const container = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        /**
+         * Escape HTML to prevent XSS
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Load and display the lesson
+         */
+        async function loadLesson() {
+            const lessonId = getLessonIdFromUrl();
+            if (!lessonId) {
+                showToast('No lesson specified', 'error');
+                return;
+            }
+
+            try {
+                // Load lesson details
+                const lesson = lessonManager.getLessonDetails(lessonId);
+                if (!lesson) {
+                    showToast('Lesson not found', 'error');
+                    return;
+                }
+
+                // Load course info
+                const course = courseManager.getCourseById(lesson.courseId);
+                
+                // Update page title
+                document.title = `${lesson.title} - Solo Music`;
+
+                // Update header
+                document.getElementById('lesson-title').textContent = lesson.title;
+                document.getElementById('course-name').textContent = `Course: ${escapeHtml(course?.title || 'Unknown')}`;
+
+                // Update description
+                if (lesson.description) {
+                    document.getElementById('lesson-description').textContent = lesson.description;
+                } else {
+                    document.getElementById('lesson-description-section').style.display = 'none';
+                }
+
+                // Update video section
+                if (lesson.youtubeUrl) {
+                    document.getElementById('lesson-video-link').href = lesson.youtubeUrl;
+                    document.getElementById('lesson-video-section').style.display = 'block';
+                } else {
+                    document.getElementById('lesson-video-section').style.display = 'none';
+                }
+
+                // Render AlphaTex
+                if (lesson.alphaTex) {
+                    document.getElementById('lesson-alphatab-section').style.display = 'block';
+                    setTimeout(() => {
+                        alphaTabRenderer.renderAlphaTex(lesson.alphaTex, 'lesson-alphatab');
+                    }, 100);
+                } else {
+                    document.getElementById('lesson-alphatab-section').style.display = 'none';
+                }
+
+                // Update notes
+                if (lesson.notes) {
+                    document.getElementById('lesson-notes').textContent = lesson.notes;
+                    document.getElementById('lesson-notes-section').style.display = 'block';
+                } else {
+                    document.getElementById('lesson-notes-section').style.display = 'none';
+                }
+
+                // Update progress display
+                updateProgressDisplay(lessonId, course?.id);
+
+            } catch (error) {
+                console.error('Error loading lesson:', error);
+                showToast('Error loading lesson', 'error');
+            }
+        }
+
+        /**
+         * Update progress display
+         */
+        function updateProgressDisplay(lessonId, courseId) {
+            const progress = dataManager.getProgressByLesson(lessonId);
+            const isCompleted = progress?.completed || false;
+            
+            // Update status
+            document.getElementById('lesson-status').textContent = isCompleted ? '✓ Completed' : 'Not completed';
+            
+            // Update button
+            const btn = document.getElementById('btn-toggle-complete');
+            if (isCompleted) {
+                btn.textContent = 'Mark as Incomplete';
+                btn.className = 'btn btn-secondary';
+            } else {
+                btn.textContent = 'Mark as Completed';
+                btn.className = 'btn btn-primary';
+            }
+
+            // Update course progress
+            if (courseId) {
+                const courseProgress = progressTracker.getCourseProgress(courseId);
+                const completionPercent = courseProgress.completionPercentage || 0;
+                
+                document.getElementById('course-progress-text').textContent = 
+                    `${completionPercent}% complete`;
+                document.getElementById('progress-fraction').textContent = 
+                    `${courseProgress.completedLessons}/${courseProgress.totalLessons}`;
+                document.getElementById('progress-fill').style.width = `${completionPercent}%`;
+            }
+        }
+
+        /**
+         * Toggle lesson completion status
+         */
+        function toggleLessonCompletion() {
+            const lessonId = getLessonIdFromUrl();
+            const progress = dataManager.getProgressByLesson(lessonId);
+            const isCompleted = progress?.completed || false;
+
+            try {
+                if (isCompleted) {
+                    progressTracker.markLessonIncomplete(lessonId);
+                    showToast('Marked as incomplete', 'info');
+                } else {
+                    progressTracker.markLessonCompleted(lessonId);
+                    showToast('Marked as completed!', 'success');
+                }
+
+                // Get the lesson to update course progress display
+                const lesson = lessonManager.getLessonDetails(lessonId);
+                updateProgressDisplay(lessonId, lesson.courseId);
+            } catch (error) {
+                console.error('Error updating progress:', error);
+                showToast('Error updating progress', 'error');
+            }
+        }
+
+        // Setup event listeners
+        document.getElementById('btn-toggle-complete').addEventListener('click', toggleLessonCompletion);
+
+        // Load lesson on page load
+        window.addEventListener('load', loadLesson);
+    </script>
+</body>
+</html>
