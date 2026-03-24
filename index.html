@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Music - Personal Instrumental Learning Management System</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/alphaTab.js"></script>
+    
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <h1>🎸 Solo Music</h1>
+            </div>
+            <div class="navbar-menu">
+                <button id="nav-dashboard" class="nav-btn active">Dashboard</button>
+                <button id="nav-courses" class="nav-btn">Courses</button>
+                <button id="nav-settings" class="nav-btn">Settings</button>
+                <button id="user-profile" class="nav-btn profile-btn">Profile</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <section id="dashboard-view" class="view active">
+                <div class="dashboard-header">
+                    <h2>Welcome to Solo Music</h2>
+                    <p>Your personal instrumental learning management system</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Quick Stats -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <h3 id="stat-courses">0</h3>
+                            <p>Courses</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-lessons">0</h3>
+                            <p>Lessons</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-completed">0</h3>
+                            <p>Completed</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-progress">0%</h3>
+                            <p>Overall Progress</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Courses -->
+                    <div class="recent-section">
+                        <div class="section-header">
+                            <h3>Your Courses</h3>
+                            <button id="btn-new-course" class="btn btn-primary">+ New Course</button>
+                        </div>
+                        <div id="courses-list" class="courses-list">
+                            <p class="empty-state">No courses yet. Create your first course to get started!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Courses View -->
+            <section id="courses-view" class="view">
+                <div class="view-header">
+                    <h2>Courses</h2>
+                    <button id="btn-add-course" class="btn btn-primary">+ New Course</button>
+                </div>
+                <div id="all-courses-grid" class="courses-grid">
+                    <p class="empty-state">No courses yet.</p>
+                </div>
+            </section>
+
+            <!-- Course Detail View -->
+            <section id="course-detail-view" class="view">
+                <button id="btn-back-to-courses" class="btn btn-secondary">← Back</button>
+                <div id="course-detail-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Lesson Editor View -->
+            <section id="lesson-editor-view" class="view">
+                <button id="btn-back-from-lesson" class="btn btn-secondary">← Back</button>
+                <div class="lesson-editor-container">
+                    <form id="lesson-form">
+                        <div class="form-group">
+                            <label for="lesson-title">Lesson Title</label>
+                            <input type="text" id="lesson-title" required placeholder="e.g., Basic Chord Progression">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lesson-description">Description / Notes</label>
+                            <textarea id="lesson-description" rows="4" placeholder="Detailed instructions and context for the lesson"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lesson-youtube">YouTube Link</label>
+                            <input type="url" id="lesson-youtube" placeholder="https://youtube.com/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lesson-alphatex">AlphaTex Content (Tabs/Sheet Music)</label>
+                            <textarea id="lesson-alphatex" rows="8" placeholder="Paste AlphaTex content here. Will be rendered using AlphaTab."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lesson-notes">Additional Notes</label>
+                            <textarea id="lesson-notes" rows="4" placeholder="Personal practice notes and tips"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lesson-rating">Rating</label>
+                            <div class="rating-input">
+                                <input type="number" id="lesson-rating" min="0" max="5" step="0.5" placeholder="0-5">
+                                <span>/5</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Lesson</button>
+                            <button type="button" id="btn-delete-lesson" class="btn btn-danger">Delete</button>
+                        </div>
+                    </form>
+
+                    <!-- AlphaTab Preview -->
+                    <div class="alphatab-preview">
+                        <h3>Preview</h3>
+                        <div id="alphatab-container" style="width: 100%; max-width: 100%; overflow:scroll;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="settings-view" class="view">
+                <div class="settings-container">
+                    <h2>Settings & Integrations</h2>
+
+                    <!-- Google Drive Integration -->
+                    <div class="settings-section">
+                        <h3>Google Drive Integration</h3>
+                        <p>Connect your Google Drive to backup and sync your lessons.</p>
+                        
+                        <div id="google-drive-setup">
+                            <div class="form-group">
+                                <label for="google-client-id">Google OAuth Client ID</label>
+                                <input type="text" id="google-client-id" placeholder="Your Google Cloud Console Client ID">
+                                <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
+                                    Get your Client ID from <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
+                                </p>
+                            </div>
+                            <button id="btn-save-client-id" class="btn btn-primary">Save Client ID</button>
+                        </div>
+
+                        <div id="google-drive-status" style="margin-top: 1.5rem;">
+                            <p id="google-status-text">Not connected</p>
+                            <button id="btn-google-connect" class="btn btn-primary">Connect to Google Drive</button>
+                            <button id="btn-google-sync" class="btn btn-secondary" style="display: none;">Sync Now</button>
+                            <button id="btn-google-disconnect" class="btn btn-danger" style="display: none;">Disconnect</button>
+                        </div>
+                    </div>
+
+                    <!-- AI Chat Integration -->
+                    <div class="settings-section">
+                        <h3>AI Chat Integration</h3>
+                        <p>Configure AI Chat URL for lesson generation assistance.</p>
+                        <div class="form-group">
+                            <label for="ai-chat-url">AI Chat URL</label>
+                            <input type="url" id="ai-chat-url" placeholder="e.g., https://gemini.google.com/app">
+                        </div>
+                        <button id="btn-save-ai-chat" class="btn btn-primary">Save AI Chat Config</button>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="settings-section">
+                        <h3>Data Management</h3>
+                        <button id="btn-export-data" class="btn btn-secondary">Export Data (JSON)</button>
+                        <button id="btn-import-data" class="btn btn-secondary">Import Data</button>
+                        <button id="btn-clear-data" class="btn btn-danger">Clear All Data</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Course Modal -->
+    <div id="course-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Course</h2>
+            <form id="course-form">
+                <div class="form-group">
+                    <label for="course-title">Course Title</label>
+                    <input type="text" id="course-title" required placeholder="e.g., Guitar Fundamentals">
+                </div>
+                <div class="form-group">
+                    <label for="course-description">Description</label>
+                    <textarea id="course-description" rows="4" placeholder="What will students learn?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="course-instrument">Instrument</label>
+                    <select id="course-instrument" required>
+                        <option value="">Select an instrument</option>
+                        <option value="guitar">Guitar</option>
+                        <option value="drums">Drums</option>
+                        <option value="bass">Bass</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Course</button>
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Course Modal -->
+    <div id="edit-course-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Course</h2>
+            <form id="edit-course-form">
+                <input type="hidden" id="edit-course-id">
+                <div class="form-group">
+                    <label for="edit-course-title">Course Title</label>
+                    <input type="text" id="edit-course-title" required placeholder="Course title">
+                </div>
+                <div class="form-group">
+                    <label for="edit-course-description">Description</label>
+                    <textarea id="edit-course-description" rows="4" placeholder="Course description"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="uiManager.handleSaveEditCourse()">Save Changes</button>
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data-manager.js"></script>
+    <script src="js/course-manager.js"></script>
+    <script src="js/lesson-manager.js"></script>
+    <script src="js/alphatab-renderer.js"></script>
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/google-drive-sync.js"></script>
+    <script src="js/ai-chat.js"></script>
+    <script src="js/ui-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
