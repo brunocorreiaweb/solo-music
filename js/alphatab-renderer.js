@@ -30,6 +30,13 @@ class AlphaTabRenderer {
             return false;
         }
 
+        // Check if alphaTab library is loaded
+        if (typeof alphaTab === 'undefined') {
+            console.error('AlphaTab library not loaded');
+            container.innerHTML = '<p style="color: #f44; padding: 20px;">Music notation library not available. Please refresh the page.</p>';
+            return false;
+        }
+
         // Cancel any pending visibility checks for this container
         if (this.visibilityTimeouts[containerId]) {
             clearTimeout(this.visibilityTimeouts[containerId]);

@@ -223,6 +223,23 @@
         }
 
         /**
+         * Wait for alphaTab library to be available
+         */
+        function waitForAlphaTab(callback, maxWait = 5000) {
+            const startTime = Date.now();
+            const checkInterval = setInterval(() => {
+                if (typeof alphaTab !== 'undefined') {
+                    clearInterval(checkInterval);
+                    callback();
+                } else if (Date.now() - startTime > maxWait) {
+                    clearInterval(checkInterval);
+                    console.error('AlphaTab library failed to load');
+                    showToast('Music notation library failed to load', 'error');
+                }
+            }, 50);
+        }
+
+        /**
          * Escape HTML to prevent XSS
          */
         function escapeHtml(text) {
@@ -277,9 +294,9 @@
                 // Render AlphaTex
                 if (lesson.alphaTex) {
                     document.getElementById('lesson-alphatab-section').style.display = 'block';
-                    setTimeout(() => {
+                    waitForAlphaTab(() => {
                         alphaTabRenderer.renderAlphaTex(lesson.alphaTex, 'lesson-alphatab');
-                    }, 100);
+                    });
                 } else {
                     document.getElementById('lesson-alphatab-section').style.display = 'none';
                 }
