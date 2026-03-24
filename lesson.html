@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/responsive.css">
     
     <!-- AlphaTab -->
-    <script src="https://cdn.jsdelivr.net/npm/alphatab@latest/dist/alphatab.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/alphaTab.js"></script>
     
     <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -97,7 +97,7 @@
         .lesson-viewer-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #ffffff;
         }
 
@@ -122,8 +122,6 @@
         }
 
         .lesson-viewer-content {
-            flex: 1;
-            overflow-y: auto;
             padding: 2rem 1.5rem;
             max-width: 900px;
             margin: 0 auto;
