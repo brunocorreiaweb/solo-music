@@ -381,40 +381,98 @@ class DataManager {
         try {
             const fileContent = JSON.stringify(data, null, 2);
             const blob = new Blob([fileContent], { type: 'application/json' });
+            const timestamp = now.toISOString();
             
-            const metadata = {
-                name: fileName,
-                mimeType: 'application/json',
-                parents: [this.googleFolderId]
-            };
+            // Check if file with same name already exists
+            const existingFile = await this.findGoogleDriveFile(fileName);
+            
+            if (existingFile) {
+                // Update existing file
+                const response = await fetch(
+                    `https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=media`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${this.googleAccessToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: fileContent
+                    }
+                );
 
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', blob);
-
-            const response = await fetch(
-                'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${this.googleAccessToken}`
-                    },
-                    body: form
+                if (response.ok) {
+                    const settings = this.getSettings();
+                    this.updateSettings({
+                        ...settings,
+                        lastSyncTime: timestamp
+                    });
+                    return true;
                 }
-            );
+            } else {
+                // Create new file
+                const metadata = {
+                    name: fileName,
+                    mimeType: 'application/json',
+                    parents: [this.googleFolderId]
+                };
 
-            if (response.ok) {
-                const settings = this.getSettings();
-                this.updateSettings({
-                    ...settings,
-                    lastSyncTime: timestamp
-                });
-                return true;
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', blob);
+
+                const response = await fetch(
+                    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${this.googleAccessToken}`
+                        },
+                        body: form
+                    }
+                );
+
+                if (response.ok) {
+                    const settings = this.getSettings();
+                    this.updateSettings({
+                        ...settings,
+                        lastSyncTime: timestamp
+                    });
+                    return true;
+                }
             }
             return false;
         } catch (error) {
             console.error('Error syncing to Google Drive:', error);
             return false;
+        }
+    }
+
+    /**
+     * Find a file in Google Drive by name
+     */
+    async findGoogleDriveFile(fileName) {
+        if (!this.googleAccessToken || !this.googleFolderId) {
+            return null;
+        }
+
+        try {
+            const response = await fetch(
+                `https://www.googleapis.com/drive/v3/files?q='${this.googleFolderId}' in parents and name='${fileName}' and trashed=false&spaces=drive&pageSize=1`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${this.googleAccessToken}`
+                    }
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.files && data.files.length > 0 ? data.files[0] : null;
+            }
+            return null;
+        } catch (error) {
+            console.error('Error finding file:', error);
+            return null;
         }
     }
 
