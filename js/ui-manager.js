@@ -158,6 +158,7 @@ class UIManager {
         const saveClientIdBtn = document.getElementById('btn-save-client-id');
         const googleConnectBtn = document.getElementById('btn-google-connect');
         const googleSyncBtn = document.getElementById('btn-google-sync');
+        const googleListBackupsBtn = document.getElementById('btn-google-list-backups');
         const googleDisconnectBtn = document.getElementById('btn-google-disconnect');
 
         // Load saved AI Chat URL
@@ -209,6 +210,7 @@ class UIManager {
         // Google Drive
         googleConnectBtn?.addEventListener('click', () => this.handleGoogleConnect());
         googleSyncBtn?.addEventListener('click', () => this.handleGoogleSync());
+        googleListBackupsBtn?.addEventListener('click', () => this.handleGoogleListBackups());
         googleDisconnectBtn?.addEventListener('click', () => this.handleGoogleDisconnect());
 
         // Update Google Drive status
@@ -716,17 +718,20 @@ class UIManager {
         const statusText = document.getElementById('google-status-text');
         const connectBtn = document.getElementById('btn-google-connect');
         const syncBtn = document.getElementById('btn-google-sync');
+        const listBackupsBtn = document.getElementById('btn-google-list-backups');
         const disconnectBtn = document.getElementById('btn-google-disconnect');
 
         if (googleDriveSyncManager.isAuthenticated()) {
             if (statusText) statusText.textContent = '✓ Connected to Google Drive';
             if (connectBtn) connectBtn.style.display = 'none';
             if (syncBtn) syncBtn.style.display = 'inline-block';
+            if (listBackupsBtn) listBackupsBtn.style.display = 'inline-block';
             if (disconnectBtn) disconnectBtn.style.display = 'inline-block';
         } else {
             if (statusText) statusText.textContent = 'Not connected';
             if (connectBtn) connectBtn.style.display = 'inline-block';
             if (syncBtn) syncBtn.style.display = 'none';
+            if (listBackupsBtn) listBackupsBtn.style.display = 'none';
             if (disconnectBtn) disconnectBtn.style.display = 'none';
         }
     }
@@ -765,6 +770,82 @@ class UIManager {
             googleDriveSyncManager.disconnect();
             this.updateGoogleDriveStatus();
             this.showToast('Google Drive disconnected', 'success');
+        }
+    }
+
+    /**
+     * Handle listing backup files
+     */
+    async handleGoogleListBackups() {
+        if (!googleDriveSyncManager.isAuthenticated()) {
+            this.showToast('Not connected to Google Drive', 'error');
+            return;
+        }
+
+        try {
+            this.showToast('Loading backups...', 'info');
+            const files = await googleDriveSyncManager.listBackupFiles();
+            this.displayBackupFiles(files);
+        } catch (error) {
+            console.error('Error listing backups:', error);
+            this.showToast('Error loading backups: ' + error.message, 'error');
+        }
+    }
+
+    /**
+     * Display backup files list
+     */
+    displayBackupFiles(files) {
+        const section = document.getElementById('backup-files-section');
+        const list = document.getElementById('backup-files-list');
+
+        if (!files || files.length === 0) {
+            list.innerHTML = '<p style="padding: 1rem; text-align: center; color: #999;">No backups found</p>';
+            if (section) section.style.display = 'block';
+            return;
+        }
+
+        list.innerHTML = files.map(file => `
+            <div style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 500;">${this.escapeHtml(file.name)}</div>
+                    <div style="font-size: 0.875rem; color: #666;">
+                        ${new Date(file.createdTime).toLocaleString()}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-sm btn-primary" onclick="uiManager.handleGoogleLoadBackup('${file.id}', '${this.escapeHtml(file.name)}')">
+                        Load
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        if (section) section.style.display = 'block';
+    }
+
+    /**
+     * Handle loading a backup file
+     */
+    async handleGoogleLoadBackup(fileId, fileName) {
+        if (!confirm(`Load backup from "${fileName}"? This will replace all current data.`)) {
+            return;
+        }
+
+        try {
+            this.showToast('Loading backup...', 'info');
+            const success = await dataManager.loadFromGoogleDrive(fileId);
+            if (success) {
+                this.showToast('Backup loaded successfully', 'success');
+                this.updateDashboard();
+                // Refresh the backup list
+                await this.handleGoogleListBackups();
+            } else {
+                this.showToast('Error loading backup', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading backup:', error);
+            this.showToast('Error: ' + error.message, 'error');
         }
     }
 

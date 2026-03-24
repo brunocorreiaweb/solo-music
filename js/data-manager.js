@@ -371,8 +371,12 @@ class DataManager {
         }
 
         const data = this.exportData();
-        const timestamp = new Date().toISOString();
-        const fileName = `solo-music-backup-${timestamp.split('T')[0]}.json`;
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const timeStr = String(now.getHours()).padStart(2, '0') + ':' + 
+                        String(now.getMinutes()).padStart(2, '0') + ':' + 
+                        String(now.getSeconds()).padStart(2, '0'); // hh:mm:ss
+        const fileName = `solo-music-backup-${dateStr}-${timeStr}.json`;
 
         try {
             const fileContent = JSON.stringify(data, null, 2);

@@ -379,6 +379,15 @@ a:hover {
     transform: scale(0.98);
 }
 
+.btn-sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+}
+
+.btn-sm:active {
+    transform: scale(0.96);
+}
+
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
