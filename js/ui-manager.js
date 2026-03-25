@@ -192,6 +192,36 @@ class UIManager {
             }
         });
 
+        // Load saved metronome URL
+        const metronomeUrlInput = document.getElementById('metronome-url');
+        const saveMetronomeBtn = document.getElementById('btn-save-metronome');
+        const metronomeStatus = document.getElementById('metronome-status');
+        if (metronomeUrlInput && localStorage.getItem('metronome-url')) {
+            metronomeUrlInput.value = localStorage.getItem('metronome-url');
+        }
+
+        // Save Metronome URL
+        saveMetronomeBtn?.addEventListener('click', () => {
+            const url = metronomeUrlInput?.value;
+            if (url) {
+                try {
+                    new URL(url); // Validate URL format
+                    localStorage.setItem('metronome-url', url);
+                    metronomeStatus.textContent = '✓ Metronome URL saved successfully';
+                    metronomeStatus.style.color = '#4CAF50';
+                    this.showToast('Metronome URL saved', 'success');
+                } catch (e) {
+                    metronomeStatus.textContent = '✗ Invalid URL format';
+                    metronomeStatus.style.color = '#f44336';
+                    this.showToast('Invalid URL format', 'error');
+                }
+            } else {
+                metronomeStatus.textContent = '✗ Please enter a URL';
+                metronomeStatus.style.color = '#f44336';
+                this.showToast('Please enter a metronome URL', 'error');
+            }
+        });
+
         // Export data
         exportBtn?.addEventListener('click', () => this.handleExportData());
 

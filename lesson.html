@@ -276,6 +276,68 @@
             font-size: 1rem;
         }
 
+        /* Floating Metronome Popup */
+        .metronome-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 500px;
+            height: 500px;
+            background: #fff;
+            border: 2px solid #436d9d;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .metronome-popup.active {
+            display: flex;
+        }
+
+        .metronome-popup-header {
+            background: #436d9d;
+            color: #fff;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 0 0 auto;
+        }
+
+        .metronome-popup-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .metronome-popup-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .metronome-popup-close:hover {
+            opacity: 1;
+        }
+
+        .metronome-popup-content {
+            flex: 1;
+            overflow: auto;
+        }
+
+        .metronome-popup-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         @media (max-width: 768px) {
             .lesson-header {
                 flex-direction: column;
@@ -319,6 +381,9 @@
                     <div class="meta-label">Status</div>
                     <div id="lesson-status-badge" class="meta-value">-</div>
                 </div>
+                <button id="metronome-btn" class="control-btn" title="Open Metronome" style="display:none;">
+                    <i class="fas fa-music"></i>
+                </button>
                 <a id="youtube-btn" href="#" target="_blank" class="youtube-link" style="display:none;" title="Watch on YouTube">
                     <i class="fab fa-youtube"></i> YouTube
                 </a>
@@ -363,6 +428,19 @@
                     <i class="fas fa-check"></i>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Metronome Popup -->
+    <div class="metronome-popup" id="metronome-popup">
+        <div class="metronome-popup-header">
+            <h3>Metronome</h3>
+            <button class="metronome-popup-close" id="metronome-popup-close" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="metronome-popup-content">
+            <iframe id="metronome-iframe" frameborder="0" style="width: 100%; height: 100%;"></iframe>
         </div>
     </div>
 
@@ -575,8 +653,51 @@
             }
         }
 
+        /**
+         * Load metronome URL and setup controls
+         */
+        function setupMetronomeControls() {
+            const metronomeUrl = localStorage.getItem('metronome-url');
+            const metronomeBtn = document.getElementById('metronome-btn');
+            const metronomePopup = document.getElementById('metronome-popup');
+            const metronomePopupClose = document.getElementById('metronome-popup-close');
+            const metronomeIframe = document.getElementById('metronome-iframe');
+
+            // Show button only if URL is configured
+            if (metronomeUrl) {
+                metronomeBtn.style.display = 'inline-flex';
+
+                // Metronome button click handler
+                metronomeBtn.addEventListener('click', () => {
+                    metronomePopup.classList.toggle('active');
+                    
+                    // Load URL into iframe when opening
+                    if (metronomePopup.classList.contains('active')) {
+                        metronomeIframe.src = metronomeUrl;
+                    }
+                });
+
+                // Close button handler
+                metronomePopupClose.addEventListener('click', () => {
+                    metronomePopup.classList.remove('active');
+                });
+
+                // Click outside popup to close
+                document.addEventListener('click', (e) => {
+                    if (!metronomePopup.contains(e.target) && 
+                        e.target !== metronomeBtn && 
+                        !metronomeBtn.contains(e.target)) {
+                        metronomePopup.classList.remove('active');
+                    }
+                });
+            }
+        }
+
         // Load on page load
-        window.addEventListener('load', loadLesson);
+        window.addEventListener('load', () => {
+            loadLesson();
+            setupMetronomeControls();
+        });
     </script>
 </body>
 </html>
