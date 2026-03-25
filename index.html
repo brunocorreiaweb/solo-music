@@ -141,8 +141,26 @@
                         <h3>Preview</h3>
                         <div id="alphatab-container" style="width: 100%; max-width: 100%; overflow:scroll;"></div>
                     </div>
+
+                    <!-- AI Chat Button for Lesson Editor -->
+                    <button id="ai-chat-btn-editor" class="floating-btn" title="Open AI Chat" style="display:none;">
+                        <i class="fas fa-comments"></i>
+                    </button>
                 </div>
             </section>
+
+            <!-- AI Chat Popup for Lesson Editor -->
+            <div class="ai-chat-popup" id="ai-chat-popup-editor">
+                <div class="ai-chat-popup-header">
+                    <h3>AI Chat Assistant</h3>
+                    <button class="ai-chat-popup-minimize" id="ai-chat-popup-minimize-editor" type="button">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <div class="ai-chat-popup-content">
+                    <iframe id="ai-chat-iframe-editor" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+                </div>
+            </div>
 
             <!-- Settings View -->
             <section id="settings-view" class="view">
