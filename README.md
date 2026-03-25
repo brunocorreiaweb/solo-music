@@ -72,11 +72,6 @@ A comprehensive web application for managing music lessons and tracking practice
 - Download and restore from backups
 - Automatic sync capability
 
-💬 **AI Chat Integration**
-- Configure AI chat URL (Gemini, ChatGPT, Claude, etc.)
-- Open AI chat assistant for lesson generation
-- Copy-paste AlphaTex content for lesson creation
-
 ---
 
 ## 📁 Project Structure
@@ -96,7 +91,6 @@ solo-music/
 │   ├── alphatab-renderer.js # AlphaTab rendering
 │   ├── progress-tracker.js  # Progress tracking logic
 │   ├── google-drive-sync.js # Google Drive integration
-│   ├── ai-chat.js           # AI Chat iframe handler
 │   └── ui-manager.js        # DOM manipulation & events
 ├── assets/
 │   ├── icons/               # App icons (future)
@@ -378,7 +372,6 @@ This is a personal learning management system. Feel free to fork and customize f
 3. **Regular Updates** - Add notes after each practice session
 4. **Track Progress** - Rate each lesson completion
 5. **Backup Data** - Export regularly or use Google Drive sync
-6. **Use AI Chat** - Generate AlphaTex with AI assistance
 
 ---
 
