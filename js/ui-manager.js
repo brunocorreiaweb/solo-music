@@ -787,12 +787,19 @@ class UIManager {
             const success = await googleDriveSyncManager.syncToGoogleDrive();
             if (success) {
                 this.showToast('Data synced to Google Drive', 'success');
+                this.updateGoogleDriveStatus();
             } else {
                 this.showToast('Error syncing data', 'error');
             }
         } catch (error) {
             console.error('Error syncing:', error);
-            this.showToast('Error: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                this.showToast('Google Drive session expired. Please re-connect.', 'error');
+                googleDriveSyncManager.disconnect();
+                this.updateGoogleDriveStatus();
+            } else {
+                this.showToast('Error syncing to Google Drive: ' + error.message, 'error');
+            }
         }
     }
 
@@ -822,7 +829,13 @@ class UIManager {
             this.displayBackupFiles(files);
         } catch (error) {
             console.error('Error listing backups:', error);
-            this.showToast('Error loading backups: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                this.showToast('Google Drive session expired. Please re-connect.', 'error');
+                googleDriveSyncManager.disconnect();
+                this.updateGoogleDriveStatus();
+            } else {
+                this.showToast('Error loading backups: ' + error.message, 'error');
+            }
         }
     }
 
@@ -879,7 +892,13 @@ class UIManager {
             }
         } catch (error) {
             console.error('Error loading backup:', error);
-            this.showToast('Error: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                this.showToast('Google Drive session expired. Please re-connect.', 'error');
+                googleDriveSyncManager.disconnect();
+                this.updateGoogleDriveStatus();
+            } else {
+                this.showToast('Error loading backup: ' + error.message, 'error');
+            }
         }
     }
 

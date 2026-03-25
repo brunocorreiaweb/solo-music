@@ -182,6 +182,12 @@ class GoogleDriveSyncManager {
                 }
             );
 
+            if (response.status === 401) {
+                console.warn('Google Drive access token expired. Re-authenticating...');
+                this.disconnect();
+                throw new Error('Unauthorized: Google Drive access token expired.');
+            }
+
             if (response.ok) {
                 const data = await response.json();
                 return data.files.length > 0 ? data.files[0] : null;
@@ -189,7 +195,7 @@ class GoogleDriveSyncManager {
             return null;
         } catch (error) {
             console.error('Error finding folder:', error);
-            return null;
+            throw error; // Re-throw to be caught by calling function
         }
     }
 
@@ -215,6 +221,12 @@ class GoogleDriveSyncManager {
                 }
             );
 
+            if (response.status === 401) {
+                console.warn('Google Drive access token expired. Re-authenticating...');
+                this.disconnect();
+                throw new Error('Unauthorized: Google Drive access token expired.');
+            }
+
             if (response.ok) {
                 return await response.json();
             }
@@ -237,6 +249,10 @@ class GoogleDriveSyncManager {
             const success = await this.dataManager.syncToGoogleDrive();
             return success;
         } catch (error) {
+            if (error.message.includes('Unauthorized')) {
+                this.disconnect();
+                throw new Error('Unauthorized: Google Drive access token expired. Please re-authenticate.');
+            }
             console.error('Error syncing to Google Drive:', error);
             throw error;
         }
@@ -260,6 +276,12 @@ class GoogleDriveSyncManager {
                 }
             );
 
+            if (response.status === 401) {
+                console.warn('Google Drive access token expired. Re-authenticating...');
+                this.disconnect();
+                throw new Error('Unauthorized: Google Drive access token expired.');
+            }
+
             if (response.ok) {
                 const data = await response.json();
                 return data.files || [];
@@ -267,7 +289,7 @@ class GoogleDriveSyncManager {
             return [];
         } catch (error) {
             console.error('Error listing files:', error);
-            return [];
+            throw error;
         }
     }
 
@@ -288,6 +310,12 @@ class GoogleDriveSyncManager {
                     }
                 }
             );
+
+            if (response.status === 401) {
+                console.warn('Google Drive access token expired. Re-authenticating...');
+                this.disconnect();
+                throw new Error('Unauthorized: Google Drive access token expired.');
+            }
 
             if (response.ok) {
                 return await response.json();
@@ -318,10 +346,16 @@ class GoogleDriveSyncManager {
                 }
             );
 
+            if (response.status === 401) {
+                console.warn('Google Drive access token expired. Re-authenticating...');
+                this.disconnect();
+                throw new Error('Unauthorized: Google Drive access token expired.');
+            }
+
             return response.ok;
         } catch (error) {
             console.error('Error deleting file:', error);
-            return false;
+            throw error;
         }
     }
 
@@ -334,10 +368,14 @@ class GoogleDriveSyncManager {
         }
 
         try {
-            const backupData = await this.downloadBackupFile(fileId);
+            const backupData = await this.downloadBackupFile(fileId); // downloadBackupFile will handle 401
             const success = this.dataManager.importData(backupData);
             return success;
         } catch (error) {
+            if (error.message.includes('Unauthorized')) {
+                // Re-throw the unauthorized error from downloadBackupFile
+                throw error;
+            }
             console.error('Error restoring from backup:', error);
             return false;
         }
