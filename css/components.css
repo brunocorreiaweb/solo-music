@@ -413,7 +413,7 @@ input[type="checkbox"] {
    ======================== */
 
 .floating-btn {
-    position: fixed !important;
+    position: fixed;
     bottom: 20px;
     right: 20px;
     width: 60px;
@@ -425,16 +425,21 @@ input[type="checkbox"] {
     cursor: pointer;
     font-size: 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s, box-shadow 0.2s;
     z-index: 1999;
+    padding: 0;
 }
 
 .floating-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.floating-btn:active {
+    transform: scale(0.95);
 }
 
 .ai-chat-popup {
