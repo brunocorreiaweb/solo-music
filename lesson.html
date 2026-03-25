@@ -82,6 +82,42 @@
             width: 100%;
         }
 
+        /* AlphaTab cursor and playback bar styling */
+        .at-main svg .at-cursor {
+            stroke: #ff0 !important;
+            stroke-width: 2 !important;
+            opacity: 1 !important;
+        }
+
+        .at-main svg g[class*="at-cursor"] {
+            opacity: 1 !important;
+        }
+
+        /* Highlight the current bar/beat */
+        .at-main svg .at-beat {
+            opacity: 1 !important;
+            fill: rgba(255, 242, 0, 0.3) !important;
+        }
+
+        .at-main svg .at-beat-glow {
+            fill: rgba(255, 242, 0, 0.3) !important;
+            opacity: 1 !important;
+        }
+
+        .at-main svg .at-cursor-bar {
+            stroke: rgba(255, 242, 0, 1) !important;
+            stroke-width: 3 !important;
+            opacity: 1 !important;
+        }
+
+        /* General cursor line */
+        .at-main svg line.at-cursor,
+        .at-main svg line[role="presentation"] {
+            stroke: #ffff00 !important;
+            stroke-width: 2 !important;
+            opacity: 1 !important;
+        }
+
         /* Player controls */
         .lesson-controls {
             flex: 0 0 auto;
