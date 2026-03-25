@@ -31,12 +31,6 @@
         font-size: var(--font-size-sm);
     }
 
-    .profile-btn {
-        border-left: none;
-        padding-left: var(--spacing-md);
-        margin-left: 0;
-    }
-
     .main-content {
         padding: var(--spacing-lg);
     }
