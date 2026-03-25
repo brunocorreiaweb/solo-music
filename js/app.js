@@ -65,7 +65,6 @@ class SoloMusicApp {
             { name: 'progressTracker', obj: progressTracker },
             { name: 'alphaTabRenderer', obj: alphaTabRenderer },
             { name: 'googleDriveSyncManager', obj: googleDriveSyncManager },
-            { name: 'aiChatManager', obj: aiChatManager },
             { name: 'uiManager', obj: uiManager }
         ];
 

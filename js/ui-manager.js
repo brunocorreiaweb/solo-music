@@ -141,73 +141,14 @@ class UIManager {
             }
         });
 
-        // AI Chat for lesson editor
-        this.setupAIChatEditor();
-
         // Settings
         this.setupSettingsEventListeners();
-    }
-
-    /**
-     * Setup AI Chat for lesson editor
-     */
-    setupAIChatEditor() {
-        const aiChatUrl = localStorage.getItem('ai-chat-url');
-        const aiChatBtn = document.getElementById('ai-chat-btn-editor');
-        const aiChatPopup = document.getElementById('ai-chat-popup-editor');
-        const aiChatMinimizeBtn = document.getElementById('ai-chat-popup-minimize-editor');
-        const aiChatIframe = document.getElementById('ai-chat-iframe-editor');
-
-        // Hide button if no URL configured
-        if (!aiChatUrl) {
-            if (aiChatBtn) aiChatBtn.classList.add('hidden');
-            return;
-        }
-
-        if (aiChatBtn) {
-            aiChatBtn.classList.remove('hidden');
-
-            // AI Chat button click handler - opens popup
-            aiChatBtn.addEventListener('click', () => {
-                aiChatPopup.classList.add('active');
-                aiChatPopup.classList.remove('minimized');
-                
-                // Load URL into iframe when opening
-                if (!aiChatIframe.src) {
-                    aiChatIframe.src = aiChatUrl;
-                }
-            });
-
-            // Minimize button handler
-            aiChatMinimizeBtn.addEventListener('click', () => {
-                aiChatPopup.classList.add('minimized');
-            });
-
-            // Click on minimized popup to expand
-            aiChatPopup.addEventListener('click', (e) => {
-                if (aiChatPopup.classList.contains('minimized') && 
-                    e.target === aiChatPopup) {
-                    aiChatPopup.classList.remove('minimized');
-                }
-            });
-
-            // Click outside popup to close completely
-            document.addEventListener('click', (e) => {
-                if (!aiChatPopup.contains(e.target) && 
-                    e.target !== aiChatBtn && 
-                    !aiChatBtn.contains(e.target)) {
-                    aiChatPopup.classList.remove('active');
-                }
-            });
-        }
     }
 
     /**
      * Setup settings event listeners
      */
     setupSettingsEventListeners() {
-        const aiChatUrlInput = document.getElementById('ai-chat-url');
-        const saveAIChatBtn = document.getElementById('btn-save-ai-chat');
         const exportBtn = document.getElementById('btn-export-data');
         const importBtn = document.getElementById('btn-import-data');
         const clearBtn = document.getElementById('btn-clear-data');
@@ -218,26 +159,12 @@ class UIManager {
         const googleListBackupsBtn = document.getElementById('btn-google-list-backups');
         const googleDisconnectBtn = document.getElementById('btn-google-disconnect');
 
-        // Load saved AI Chat URL
+        
         const settings = dataManager.getSettings();
-        if (aiChatUrlInput && settings.aiChatUrl) {
-            aiChatUrlInput.value = settings.aiChatUrl;
-        }
-
         // Load saved Google Client ID
         if (googleClientIdInput && settings.googleClientId) {
             googleClientIdInput.value = settings.googleClientId;
         }
-
-        // Save AI Chat URL
-        saveAIChatBtn?.addEventListener('click', () => {
-            const url = aiChatUrlInput?.value;
-            if (url && aiChatManager.setAIChatUrl(url)) {
-                this.showToast('AI Chat URL saved', 'success');
-            } else {
-                this.showToast('Invalid URL', 'error');
-            }
-        });
 
         // Save Google Client ID
         saveClientIdBtn?.addEventListener('click', () => {

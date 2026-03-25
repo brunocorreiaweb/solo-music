@@ -144,24 +144,6 @@
                 </div>
             </section>
 
-            <!-- AI Chat Button and Popup for Lesson Editor (Outside view section) -->
-            <button id="ai-chat-btn-editor" class="floating-btn" title="Open AI Chat">
-                <i class="fas fa-comments"></i>
-            </button>
-
-            <!-- AI Chat Popup for Lesson Editor -->
-            <div class="ai-chat-popup" id="ai-chat-popup-editor">
-                <div class="ai-chat-popup-header">
-                    <h3>AI Chat Assistant</h3>
-                    <button class="ai-chat-popup-minimize" id="ai-chat-popup-minimize-editor" type="button">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
-                <div class="ai-chat-popup-content">
-                    <iframe id="ai-chat-iframe-editor" frameborder="0" style="width: 100%; height: 100%;"></iframe>
-                </div>
-            </div>
-
             <!-- Settings View -->
             <section id="settings-view" class="view">
                 <div class="settings-container">
@@ -196,17 +178,6 @@
                             <h4 style="margin-bottom: 1rem;">Backup Files</h4>
                             <div id="backup-files-list" style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 0.5rem;"></div>
                         </div>
-                    </div>
-
-                    <!-- AI Chat Integration -->
-                    <div class="settings-section">
-                        <h3>AI Chat Integration</h3>
-                        <p>Configure AI Chat URL for lesson generation assistance.</p>
-                        <div class="form-group">
-                            <label for="ai-chat-url">AI Chat URL</label>
-                            <input type="url" id="ai-chat-url" placeholder="e.g., https://gemini.google.com/app">
-                        </div>
-                        <button id="btn-save-ai-chat" class="btn btn-primary">Save AI Chat Config</button>
                     </div>
 
                     <!-- Metronome Integration -->
@@ -295,7 +266,6 @@
     <script src="js/alphatab-renderer.js"></script>
     <script src="js/progress-tracker.js"></script>
     <script src="js/google-drive-sync.js"></script>
-    <script src="js/ai-chat.js"></script>
     <script src="js/ui-manager.js"></script>
     <script src="js/app.js"></script>
 </body>
