@@ -86,18 +86,20 @@ class AlphaTabRenderer {
 
             // Create AlphaTab instance with proper API usage
             // tex: true tells AlphaTab to parse the container's text content as AlphaTex
+            const viewport = container.parentElement; // Get the .at-viewport parent
             const at = new alphaTab.AlphaTabApi(container, {
                 core: {
                     tex: true,
                     tracks: [0]
                 },
                 display: {
-                    scale: 1.0
+                    scale: 1.0,
+                    layoutMode: alphaTab.LayoutMode.Page
                 },
                 player: {
                     enablePlayer: true,
                     enableCursor: true,
-                    scrollMode: 'smooth',
+                    scrollElement: viewport, // This enables autoscrolling
                     soundFont: [
                         'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2'
                     ]
