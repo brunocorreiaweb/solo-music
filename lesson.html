@@ -80,42 +80,46 @@
 
         .at-main {
             width: 100%;
+            position: relative;
         }
 
-        /* AlphaTab cursor and playback bar styling */
-        .at-main svg .at-cursor {
-            stroke: #ff0 !important;
-            stroke-width: 2 !important;
-            opacity: 1 !important;
+        /* Ensure SVG elements are visible */
+        .at-main svg {
+            overflow: visible;
+            z-index: 0;
         }
 
-        .at-main svg g[class*="at-cursor"] {
-            opacity: 1 !important;
+        /* AlphaTab cursor line - yellow playback position indicator */
+        .at-main svg line {
+            vector-effect: non-scaling-stroke;
         }
 
-        /* Highlight the current bar/beat */
-        .at-main svg .at-beat {
-            opacity: 1 !important;
-            fill: rgba(255, 242, 0, 0.3) !important;
-        }
-
-        .at-main svg .at-beat-glow {
-            fill: rgba(255, 242, 0, 0.3) !important;
-            opacity: 1 !important;
-        }
-
-        .at-main svg .at-cursor-bar {
-            stroke: rgba(255, 242, 0, 1) !important;
-            stroke-width: 3 !important;
-            opacity: 1 !important;
-        }
-
-        /* General cursor line */
-        .at-main svg line.at-cursor,
-        .at-main svg line[role="presentation"] {
+        /* Target line elements that are part of the cursor */
+        .at-surface-svg line[stroke-width="2"],
+        .at-surface-svg line[stroke="#ffff00"],
+        .at-surface-svg line[stroke="rgb(255, 255, 0)"] {
             stroke: #ffff00 !important;
             stroke-width: 2 !important;
             opacity: 1 !important;
+        }
+
+        /* Fallback: make all lines visible during playback */
+        .at-main svg line {
+            stroke: inherit;
+            opacity: 1;
+        }
+
+        /* Highlight note/beat groups with yellow tint */
+        .at-main svg g[class*="b"] text {
+            opacity: 1;
+        }
+
+        /* Canvas cursor overlay if used */
+        canvas[data-alphatab-surface] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
         }
 
         /* Player controls */

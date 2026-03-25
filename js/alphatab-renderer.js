@@ -75,11 +75,13 @@ class AlphaTabRenderer {
             container.innerHTML = '';
             container.textContent = '';
             
-            // Reset container styles to prevent growth
+            // Ensure container is positioned so cursor overlay works
+            container.style.position = 'relative';
             container.style.width = '100%';
             container.style.maxWidth = '100%';
             container.style.minHeight = '300px';
             container.style.maxHeight = '600px';
+            container.style.overflow = 'hidden'; // Important for cursor clipping
 
             // Place AlphaTex content directly in the container element
             container.textContent = alphaTex;
