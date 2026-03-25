@@ -83,43 +83,27 @@
             position: relative;
         }
 
-        /* Ensure SVG elements are visible */
-        .at-main svg {
-            overflow: visible;
-            z-index: 0;
+        /* AlphaTab cursor bar - the yellow playback position line */
+        .at-cursors {
+            z-index: 1000 !important;
+            pointer-events: none !important;
         }
 
-        /* AlphaTab cursor line - yellow playback position indicator */
-        .at-main svg line {
-            vector-effect: non-scaling-stroke;
-        }
-
-        /* Target line elements that are part of the cursor */
-        .at-surface-svg line[stroke-width="2"],
-        .at-surface-svg line[stroke="#ffff00"],
-        .at-surface-svg line[stroke="rgb(255, 255, 0)"] {
-            stroke: #ffff00 !important;
-            stroke-width: 2 !important;
+        .at-cursor-bar {
+            background: rgba(255, 242, 0, 0.6) !important;
+            border-left: 3px solid #ffff00 !important;
             opacity: 1 !important;
+            z-index: 1000 !important;
         }
 
-        /* Fallback: make all lines visible during playback */
-        .at-main svg line {
-            stroke: inherit;
-            opacity: 1;
+        .at-cursor-beat {
+            background: rgba(255, 242, 0, 0.3) !important;
+            opacity: 1 !important;
+            z-index: 999 !important;
         }
 
-        /* Highlight note/beat groups with yellow tint */
-        .at-main svg g[class*="b"] text {
-            opacity: 1;
-        }
-
-        /* Canvas cursor overlay if used */
-        canvas[data-alphatab-surface] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 10;
+        .at-selection {
+            opacity: 0.1 !important;
         }
 
         /* Player controls */
