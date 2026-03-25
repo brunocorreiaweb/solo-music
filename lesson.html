@@ -427,6 +427,10 @@
             const completeBtn = document.getElementById('btn-toggle-complete');
             const lessonId = getLessonIdFromUrl();
 
+            // Enable buttons immediately - they should be ready
+            playBtn.classList.remove('disabled');
+            stopBtn.classList.remove('disabled');
+
             // Update button states based on player state
             if (api.playerStateChanged) {
                 api.playerStateChanged.on((args) => {
@@ -510,14 +514,6 @@
                     completeBtn.classList.remove('active');
                 }
             });
-
-            // Enable buttons when player is ready
-            if (api.playerReady) {
-                api.playerReady.on(() => {
-                    playBtn.classList.remove('disabled');
-                    stopBtn.classList.remove('disabled');
-                });
-            }
 
             // Update complete button state
             const lesson = lessonManager.getLessonDetails(lessonId);
