@@ -253,6 +253,29 @@
             font-weight: 600;
         }
 
+        .youtube-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #ff0000;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .youtube-link:hover {
+            background: #cc0000;
+        }
+
+        .youtube-link i {
+            font-size: 1rem;
+        }
+
         @media (max-width: 768px) {
             .lesson-header {
                 flex-direction: column;
@@ -296,6 +319,9 @@
                     <div class="meta-label">Status</div>
                     <div id="lesson-status-badge" class="meta-value">-</div>
                 </div>
+                <a id="youtube-btn" href="#" target="_blank" class="youtube-link" style="display:none;" title="Watch on YouTube">
+                    <i class="fab fa-youtube"></i> YouTube
+                </a>
             </div>
             <button class="close-btn" onclick="window.close(); return false;">✕</button>
         </div>
@@ -397,6 +423,15 @@
                     document.getElementById('lesson-status-badge').innerHTML = '<span class="complete-badge">✓ Completed</span>';
                 } else {
                     document.getElementById('lesson-status-badge').textContent = 'In Progress';
+                }
+
+                // Setup YouTube link if available
+                const youtubeBtn = document.getElementById('youtube-btn');
+                if (lesson.youtubeUrl) {
+                    youtubeBtn.href = lesson.youtubeUrl;
+                    youtubeBtn.style.display = 'inline-flex';
+                } else {
+                    youtubeBtn.style.display = 'none';
                 }
 
                 // Render AlphaTex if present
