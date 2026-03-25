@@ -433,6 +433,10 @@ input[type="checkbox"] {
     padding: 0;
 }
 
+.floating-btn.hidden {
+    display: none;
+}
+
 .floating-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
