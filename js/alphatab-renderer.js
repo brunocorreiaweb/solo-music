@@ -96,8 +96,11 @@ class AlphaTabRenderer {
                 },
                 player: {
                     enablePlayer: true,
-                    enableCursor: false,
-                    scrollMode: 'off'
+                    enableCursor: true,
+                    scrollMode: 'smooth',
+                    soundFont: [
+                        'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2'
+                    ]
                 }
             });
 
