@@ -158,43 +158,47 @@ class UIManager {
         const aiChatMinimizeBtn = document.getElementById('ai-chat-popup-minimize-editor');
         const aiChatIframe = document.getElementById('ai-chat-iframe-editor');
 
+        // Hide button if no URL configured
+        if (!aiChatUrl) {
+            if (aiChatBtn) aiChatBtn.classList.add('hidden');
+            return;
+        }
+
         if (aiChatBtn) {
-            if (aiChatUrl) {
-                aiChatBtn.classList.remove('hidden');
+            aiChatBtn.classList.remove('hidden');
 
-                // AI Chat button click handler - opens popup
-                aiChatBtn.addEventListener('click', () => {
-                    aiChatPopup.classList.add('active');
+            // AI Chat button click handler - opens popup
+            aiChatBtn.addEventListener('click', () => {
+                aiChatPopup.classList.add('active');
+                aiChatPopup.classList.remove('minimized');
+                
+                // Load URL into iframe when opening
+                if (!aiChatIframe.src) {
+                    aiChatIframe.src = aiChatUrl;
+                }
+            });
+
+            // Minimize button handler
+            aiChatMinimizeBtn.addEventListener('click', () => {
+                aiChatPopup.classList.add('minimized');
+            });
+
+            // Click on minimized popup to expand
+            aiChatPopup.addEventListener('click', (e) => {
+                if (aiChatPopup.classList.contains('minimized') && 
+                    e.target === aiChatPopup) {
                     aiChatPopup.classList.remove('minimized');
-                    
-                    // Load URL into iframe when opening
-                    if (!aiChatIframe.src) {
-                        aiChatIframe.src = aiChatUrl;
-                    }
-                });
+                }
+            });
 
-                // Minimize button handler
-                aiChatMinimizeBtn.addEventListener('click', () => {
-                    aiChatPopup.classList.add('minimized');
-                });
-
-                // Click on minimized popup to expand
-                aiChatPopup.addEventListener('click', (e) => {
-                    if (aiChatPopup.classList.contains('minimized') && 
-                        e.target === aiChatPopup) {
-                        aiChatPopup.classList.remove('minimized');
-                    }
-                });
-
-                // Click outside popup to close completely
-                document.addEventListener('click', (e) => {
-                    if (!aiChatPopup.contains(e.target) && 
-                        e.target !== aiChatBtn && 
-                        !aiChatBtn.contains(e.target)) {
-                        aiChatPopup.classList.remove('active');
-                    }
-                });
-            }
+            // Click outside popup to close completely
+            document.addEventListener('click', (e) => {
+                if (!aiChatPopup.contains(e.target) && 
+                    e.target !== aiChatBtn && 
+                    !aiChatBtn.contains(e.target)) {
+                    aiChatPopup.classList.remove('active');
+                }
+            });
         }
     }
 
