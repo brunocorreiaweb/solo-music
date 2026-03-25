@@ -197,12 +197,6 @@ class UIManager {
         const saveMetronomeBtn = document.getElementById('btn-save-metronome');
         const metronomeStatus = document.getElementById('metronome-status');
         
-        console.log('Metronome elements:', {
-            urlInput: metronomeUrlInput,
-            saveBtn: saveMetronomeBtn,
-            statusElement: metronomeStatus
-        });
-        
         if (metronomeUrlInput && localStorage.getItem('metronome-url')) {
             metronomeUrlInput.value = localStorage.getItem('metronome-url');
         }
@@ -211,9 +205,7 @@ class UIManager {
         if (saveMetronomeBtn) {
             saveMetronomeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Metronome save button clicked');
                 const url = metronomeUrlInput?.value;
-                console.log('URL entered:', url);
                 if (url) {
                     try {
                         new URL(url); // Validate URL format
@@ -221,22 +213,17 @@ class UIManager {
                         metronomeStatus.textContent = '✓ Metronome URL saved successfully';
                         metronomeStatus.style.color = '#4CAF50';
                         this.showToast('Metronome URL saved', 'success');
-                        console.log('Metronome URL saved successfully');
                     } catch (e) {
                         metronomeStatus.textContent = '✗ Invalid URL format';
                         metronomeStatus.style.color = '#f44336';
                         this.showToast('Invalid URL format', 'error');
-                        console.log('Invalid URL:', e);
                     }
                 } else {
                     metronomeStatus.textContent = '✗ Please enter a URL';
                     metronomeStatus.style.color = '#f44336';
                     this.showToast('Please enter a metronome URL', 'error');
-                    console.log('No URL entered');
                 }
             });
-        } else {
-            console.warn('Metronome save button not found');
         }
 
         // Export data

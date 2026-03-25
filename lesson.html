@@ -291,10 +291,35 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .metronome-popup.active {
             display: flex;
+        }
+
+        .metronome-popup.minimized {
+            display: flex;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            bottom: 20px;
+            right: 20px;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .metronome-popup.minimized .metronome-popup-header,
+        .metronome-popup.minimized .metronome-popup-content {
+            display: none;
+        }
+
+        .metronome-popup.minimized::after {
+            content: '♪';
+            font-size: 1.5rem;
+            color: #fff;
         }
 
         .metronome-popup-header {
@@ -312,7 +337,7 @@
             font-size: 1rem;
         }
 
-        .metronome-popup-close {
+        .metronome-popup-minimize {
             background: none;
             border: none;
             color: #fff;
@@ -323,7 +348,7 @@
             transition: opacity 0.2s;
         }
 
-        .metronome-popup-close:hover {
+        .metronome-popup-minimize:hover {
             opacity: 1;
         }
 
@@ -435,8 +460,8 @@
     <div class="metronome-popup" id="metronome-popup">
         <div class="metronome-popup-header">
             <h3>Metronome</h3>
-            <button class="metronome-popup-close" id="metronome-popup-close" type="button">
-                <i class="fas fa-times"></i>
+            <button class="metronome-popup-minimize" id="metronome-popup-minimize" type="button">
+                <i class="fas fa-minus"></i>
             </button>
         </div>
         <div class="metronome-popup-content">
@@ -660,29 +685,39 @@
             const metronomeUrl = localStorage.getItem('metronome-url');
             const metronomeBtn = document.getElementById('metronome-btn');
             const metronomePopup = document.getElementById('metronome-popup');
-            const metronomePopupClose = document.getElementById('metronome-popup-close');
+            const metronomeMinimizeBtn = document.getElementById('metronome-popup-minimize');
             const metronomeIframe = document.getElementById('metronome-iframe');
 
             // Show button only if URL is configured
             if (metronomeUrl) {
                 metronomeBtn.style.display = 'inline-flex';
 
-                // Metronome button click handler
+                // Metronome button click handler - opens popup
                 metronomeBtn.addEventListener('click', () => {
-                    metronomePopup.classList.toggle('active');
+                    metronomePopup.classList.add('active');
+                    metronomePopup.classList.remove('minimized');
                     
                     // Load URL into iframe when opening
-                    if (metronomePopup.classList.contains('active')) {
+                    if (!metronomeIframe.src) {
                         metronomeIframe.src = metronomeUrl;
                     }
                 });
 
-                // Close button handler
-                metronomePopupClose.addEventListener('click', () => {
-                    metronomePopup.classList.remove('active');
+                // Minimize button handler
+                metronomeMinimizeBtn.addEventListener('click', () => {
+                    metronomePopup.classList.add('minimized');
                 });
 
-                // Click outside popup to close
+                // Click on minimized popup to expand
+                metronomePopup.addEventListener('click', (e) => {
+                    // Only expand if clicking on the minimized state itself
+                    if (metronomePopup.classList.contains('minimized') && 
+                        e.target === metronomePopup) {
+                        metronomePopup.classList.remove('minimized');
+                    }
+                });
+
+                // Click outside popup to close completely
                 document.addEventListener('click', (e) => {
                     if (!metronomePopup.contains(e.target) && 
                         e.target !== metronomeBtn && 
