@@ -302,13 +302,12 @@
                 <span id="lesson-duration">00:00</span>
             </div>
 
-            <input type="range" id="progress-slider" class="control-slider" min="0" max="100" value="0">
-
             <div class="control-group">
                 <button id="metronome-toggle" class="control-btn" title="Toggle Metronome">
                     <i class="fas fa-drum"></i>
                 </button>
-                <input type="range" id="speed-slider" class="control-slider" min="40" max="300" value="100" title="Speed">
+                <input type="range" id="speed-slider" class="control-slider" min="40" max="300" value="100" title="Tempo">
+                <input type="number" id="tempo-input" min="40" max="300" value="100" style="width: 50px; height: 32px; padding: 0 4px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; background: rgba(255,255,255,0.05); color: #fff; font-size: 13px; text-align: center;" title="Tempo">
             </div>
 
             <div class="control-group" style="margin-left: auto;">
@@ -421,7 +420,7 @@
             const stopBtn = document.getElementById('btn-stop');
             const metronomeToggle = document.getElementById('metronome-toggle');
             const speedSlider = document.getElementById('speed-slider');
-            const progressSlider = document.getElementById('progress-slider');
+            const tempoInput = document.getElementById('tempo-input');
             const timeDisplay = document.getElementById('lesson-time');
             const durationDisplay = document.getElementById('lesson-duration');
             const completeBtn = document.getElementById('btn-toggle-complete');
@@ -450,9 +449,6 @@
                 api.playerPositionChanged.on((args) => {
                     timeDisplay.textContent = formatDuration(args.currentTime);
                     durationDisplay.textContent = formatDuration(args.endTime);
-                    if (args.endTime > 0) {
-                        progressSlider.value = (args.currentTime / args.endTime) * 100;
-                    }
                 });
             }
 
@@ -476,21 +472,20 @@
                 api.metronomeVolume = metronomeToggle.classList.contains('active') ? 1 : 0;
             });
 
-            // Speed slider
+            // Speed slider and tempo input sync
             speedSlider.addEventListener('input', (e) => {
-                api.playbackSpeed = parseInt(e.target.value) / 100;
+                const tempo = parseInt(e.target.value);
+                api.playbackSpeed = tempo / 100;
+                tempoInput.value = tempo;
             });
 
-            // Progress slider
-            progressSlider.addEventListener('change', (e) => {
-                const api = getAlphaTabInstance();
-                if (api && api.playerPositionChanged) {
-                    const percentage = parseFloat(e.target.value) / 100;
-                    const newTime = (api.score?.duration || 0) * percentage;
-                    if (newTime > 0) {
-                        api.timePosition = newTime;
-                    }
-                }
+            // Tempo numeric input
+            tempoInput.addEventListener('input', (e) => {
+                let tempo = parseInt(e.target.value) || 100;
+                tempo = Math.max(40, Math.min(300, tempo));
+                tempoInput.value = tempo;
+                speedSlider.value = tempo;
+                api.playbackSpeed = tempo / 100;
             });
 
             // Complete button
