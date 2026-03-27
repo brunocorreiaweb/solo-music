@@ -173,7 +173,7 @@
         }
 
         .control-slider {
-            flex: 0 0 150px;
+            flex: 0 0 100px;
             height: 6px;
             border-radius: 3px;
             outline: none;
@@ -223,8 +223,9 @@
 
         .lesson-meta {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             margin-left: auto;
+            align-items: center;
         }
 
         .meta-item {
@@ -242,6 +243,7 @@
         .meta-value {
             font-weight: 600;
             font-size: 0.875rem;
+            white-space: nowrap;
         }
 
         .complete-badge {
@@ -363,30 +365,59 @@
             border: none;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .lesson-header {
-                flex-direction: column;
-                align-items: flex-start;
+                padding: 0.75rem 1rem;
             }
-
             .lesson-header h1 {
                 font-size: 1.25rem;
+            }
+            .lesson-meta {
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .lesson-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .lesson-header-info {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .lesson-meta {
+                margin-left: 0;
+                justify-content: flex-start;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid #eee;
+            }
+
+            .close-btn {
+                position: absolute;
+                top: 0.5rem;
+                right: 0.5rem;
             }
 
             .lesson-controls {
                 flex-wrap: wrap;
                 padding: 0.5rem;
                 gap: 0.5rem;
+                justify-content: center;
             }
 
             .lesson-info {
                 order: 3;
                 flex-basis: 100%;
                 margin-top: 0.5rem;
+                justify-content: center;
             }
-
-            .lesson-meta {
-                margin-left: 0;
+            
+            .control-group {
+                gap: 0.25rem;
             }
         }
     </style>
@@ -432,6 +463,9 @@
                 <button id="btn-stop" class="control-btn disabled" title="Stop">
                     <i class="fas fa-step-backward"></i>
                 </button>
+                <button id="btn-loop" class="control-btn" title="Loop Entire Sheet">
+                    <i class="fas fa-redo"></i>
+                </button>
             </div>
 
             <div class="lesson-progress">
@@ -444,7 +478,19 @@
                 <button id="metronome-toggle" class="control-btn" title="Toggle Metronome">
                     <i class="fas fa-drum"></i>
                 </button>
-                <input type="range" id="speed-slider" class="control-slider" min="40" max="300" value="100" title="Tempo">
+                <button id="btn-mute-main" class="control-btn" title="Mute Main Track (Hear only metronome)">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                
+                <div style="display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">
+                    <button id="btn-tempo-minus" class="control-btn" style="width: 24px; height: 24px; font-size: 12px;" title="Decrease Tempo">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="range" id="speed-slider" class="control-slider" min="40" max="300" value="100" title="Tempo">
+                    <button id="btn-tempo-plus" class="control-btn" style="width: 24px; height: 24px; font-size: 12px;" title="Increase Tempo">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
                 <input type="number" id="tempo-input" min="40" max="300" value="100" style="width: 50px; height: 32px; padding: 0 4px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; background: rgba(255,255,255,0.05); color: #fff; font-size: 13px; text-align: center;" title="Tempo">
             </div>
 
@@ -578,7 +624,11 @@
 
             const playBtn = document.getElementById('btn-play');
             const stopBtn = document.getElementById('btn-stop');
+            const loopBtn = document.getElementById('btn-loop');
             const metronomeToggle = document.getElementById('metronome-toggle');
+            const muteMainBtn = document.getElementById('btn-mute-main');
+            const tempoMinusBtn = document.getElementById('btn-tempo-minus');
+            const tempoPlusBtn = document.getElementById('btn-tempo-plus');
             const speedSlider = document.getElementById('speed-slider');
             const tempoInput = document.getElementById('tempo-input');
             const timeDisplay = document.getElementById('lesson-time');
@@ -626,26 +676,63 @@
                 }
             });
 
+            // Loop button
+            loopBtn.addEventListener('click', () => {
+                loopBtn.classList.toggle('active');
+                api.isLooping = loopBtn.classList.contains('active');
+            });
+
             // Metronome toggle
             metronomeToggle.addEventListener('click', () => {
                 metronomeToggle.classList.toggle('active');
                 api.metronomeVolume = metronomeToggle.classList.contains('active') ? 1 : 0;
             });
 
-            // Speed slider and tempo input sync
-            speedSlider.addEventListener('input', (e) => {
-                const tempo = parseInt(e.target.value);
-                api.playbackSpeed = tempo / 100;
-                tempoInput.value = tempo;
+            // Mute Main Track toggle
+            let isMainMuted = false;
+            muteMainBtn.addEventListener('click', () => {
+                isMainMuted = !isMainMuted;
+                muteMainBtn.classList.toggle('active', isMainMuted);
+                const icon = muteMainBtn.querySelector('i');
+                if (isMainMuted) {
+                    icon.classList.remove('fa-volume-up');
+                    icon.classList.add('fa-volume-mute');
+                    // Mute all tracks in the score
+                    api.changeTrackMute(api.score.tracks, true);
+                } else {
+                    icon.classList.remove('fa-volume-mute');
+                    icon.classList.add('fa-volume-up');
+                    // Unmute all tracks
+                    api.changeTrackMute(api.score.tracks, false);
+                }
             });
 
-            // Tempo numeric input
-            tempoInput.addEventListener('input', (e) => {
-                let tempo = parseInt(e.target.value) || 100;
+            // Helper to update tempo across all controls
+            function updateTempo(tempo) {
                 tempo = Math.max(40, Math.min(300, tempo));
                 tempoInput.value = tempo;
                 speedSlider.value = tempo;
                 api.playbackSpeed = tempo / 100;
+            }
+
+            // Tempo minus button
+            tempoMinusBtn.addEventListener('click', () => {
+                updateTempo(parseInt(tempoInput.value) - 5);
+            });
+
+            // Tempo plus button
+            tempoPlusBtn.addEventListener('click', () => {
+                updateTempo(parseInt(tempoInput.value) + 5);
+            });
+
+            // Speed slider and tempo input sync
+            speedSlider.addEventListener('input', (e) => {
+                updateTempo(parseInt(e.target.value));
+            });
+
+            // Tempo numeric input
+            tempoInput.addEventListener('input', (e) => {
+                updateTempo(parseInt(e.target.value) || 100);
             });
 
             // Complete button
