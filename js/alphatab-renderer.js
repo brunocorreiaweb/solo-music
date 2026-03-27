@@ -80,7 +80,7 @@ class AlphaTabRenderer {
             container.style.width = '100%';
             container.style.maxWidth = '100%';
             container.style.minHeight = '300px';
-            container.style.maxHeight = '600px';
+            container.style.maxHeight = '100%';
             container.style.overflow = 'hidden'; // Important for cursor clipping
 
             // Place AlphaTex content directly in the container element
