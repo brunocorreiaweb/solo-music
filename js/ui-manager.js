@@ -277,6 +277,24 @@ class UIManager {
     }
 
     /**
+     * Fuzzy matching for search
+     * Checks if search term characters appear in string in order
+     */
+    fuzzyMatch(text, term) {
+        if (!term) return true;
+        text = text.toLowerCase();
+        term = term.toLowerCase();
+        
+        let termIdx = 0;
+        for (let textIdx = 0; textIdx < text.length && termIdx < term.length; textIdx++) {
+            if (text[textIdx] === term[termIdx]) {
+                termIdx++;
+            }
+        }
+        return termIdx === term.length;
+    }
+
+    /**
      * Display all courses
      */
     displayAllCourses() {
@@ -363,8 +381,13 @@ class UIManager {
             </div>
 
             <div class="lessons-container">
-                <div class="lessons-header">
-                    <h3>Lessons</h3>
+                <div class="lessons-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); flex: 1;">
+                        <h3>Lessons</h3>
+                        <div class="search-container" style="flex: 1; max-width: 400px; position: relative;">
+                            <input type="text" id="lesson-search" placeholder="Search lessons..." style="width: 100%; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 4px; font-size: 14px;">
+                        </div>
+                    </div>
                     <button class="btn btn-primary" onclick="uiManager.showLessonEditor(null, '${courseId}')">+ Add Lesson</button>
                 </div>
                 <div class="lessons-list" id="lessons-list">
@@ -373,18 +396,47 @@ class UIManager {
             </div>
         `;
 
+        // Setup search event listener
+        const searchInput = document.getElementById('lesson-search');
+        searchInput?.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            this.handleLessonsSearch(courseId, searchTerm);
+        });
+
         this.renderLessonsList(course.lessons, courseId);
         this.showView('course-detail');
     }
 
     /**
+     * Handle lesson search filtering
+     */
+    handleLessonsSearch(courseId, searchTerm) {
+        const course = courseManager.getCourseWithLessons(courseId);
+        if (!course) return;
+
+        let filteredLessons = course.lessons;
+        if (searchTerm) {
+            filteredLessons = course.lessons.filter(lesson => 
+                this.fuzzyMatch(lesson.title, searchTerm) || 
+                this.fuzzyMatch(lesson.description || '', searchTerm)
+            );
+        }
+
+        this.renderLessonsList(filteredLessons, courseId, searchTerm);
+    }
+
+    /**
      * Render lessons list
      */
-    renderLessonsList(lessons, courseId) {
+    renderLessonsList(lessons, courseId, searchTerm = '') {
         const lessonsList = document.getElementById('lessons-list');
 
         if (lessons.length === 0) {
-            lessonsList.innerHTML = '<p class="empty-state">No lessons yet</p>';
+            if (searchTerm) {
+                lessonsList.innerHTML = `<p class="empty-state">No lessons found matching "${this.escapeHtml(searchTerm)}"</p>`;
+            } else {
+                lessonsList.innerHTML = '<p class="empty-state">No lessons yet</p>';
+            }
             return;
         }
 
