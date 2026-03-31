@@ -10,14 +10,14 @@ class WebSocketRenderer {
         this.alphaTabApi = null;
         this.wsUrl = 'ws://localhost:8080';
         this.messageCount = 0;
-        this.isLooping = false;
+        this.lastAlphaTeX = '';
         
         this.elements = {
             alphaTab: document.getElementById('alphaTab'),
             playBtn: document.getElementById('play-btn'),
             pauseBtn: document.getElementById('pause-btn'),
             stopBtn: document.getElementById('stop-btn'),
-            loopBtn: document.getElementById('loop-btn'),
+            exportBtn: document.getElementById('export-btn'),
             statusDot: document.getElementById('status-dot'),
             statusText: document.getElementById('status-text'),
             errorPanel: document.getElementById('error-panel'),
@@ -25,7 +25,12 @@ class WebSocketRenderer {
             infoWsStatus: document.getElementById('info-ws-status'),
             infoMessages: document.getElementById('info-messages'),
             infoUpdated: document.getElementById('info-updated'),
-            infoUrl: document.getElementById('info-url')
+            infoUrl: document.getElementById('info-url'),
+            modal: document.getElementById('export-modal'),
+            exportTextarea: document.getElementById('export-textarea'),
+            closeModalBtn: document.getElementById('close-modal-btn'),
+            closeModal: document.getElementById('close-modal'),
+            copyBtn: document.getElementById('copy-btn')
         };
 
         this.init();
@@ -34,6 +39,7 @@ class WebSocketRenderer {
     init() {
         this.setupAlphaTab();
         this.setupEventListeners();
+        this.loadFromLocalStorage();
         this.connectWebSocket();
     }
 
@@ -44,9 +50,27 @@ class WebSocketRenderer {
             }
 
             const settings = {
-                core: { engine: 'svg' }
+                core: { engine: 'svg' },
+                // core: {
+                //     tex: true,
+                //     tracks: [0]
+                // },
+                display: {
+                    scale: 1.0,
+                    layoutMode: alphaTab.LayoutMode.Page,
+                    studioSetupUrl: 'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2'
+                },
+                player: {
+                    enablePlayer: true,
+                    enableCursor: true,
+                    // scrollElement: viewport,
+                    soundFont: [
+                        'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2'
+                    ]
+                }
             };
 
+            console.log(this.elements.alphaTab);
             this.alphaTabApi = new alphaTab.AlphaTabApi(
                 this.elements.alphaTab,
                 settings
@@ -63,24 +87,64 @@ class WebSocketRenderer {
     setupEventListeners() {
         this.elements.playBtn.addEventListener('click', () => {
             if (this.alphaTabApi) {
+                console.log('▶️ Playing notation');
                 this.alphaTabApi.play();
+            } else {
+                console.warn('AlphaTab API not initialized');
             }
         });
 
         this.elements.pauseBtn.addEventListener('click', () => {
             if (this.alphaTabApi) {
+                console.log('⏸️ Pausing notation');
                 this.alphaTabApi.pause();
+            } else {
+                console.warn('AlphaTab API not initialized');
             }
         });
 
         this.elements.stopBtn.addEventListener('click', () => {
             if (this.alphaTabApi) {
+                console.log('⏹️ Stopping notation');
                 this.alphaTabApi.stop();
+            } else {
+                console.warn('AlphaTab API not initialized');
             }
         });
 
-        this.elements.loopBtn.addEventListener('click', () => {
-            this.toggleLoop();
+        this.elements.exportBtn.addEventListener('click', () => {
+            this.openExportModal();
+        });
+
+        // Modal close handlers
+        this.elements.closeModalBtn.addEventListener('click', () => {
+            this.closeExportModal();
+        });
+
+        this.elements.closeModal.addEventListener('click', () => {
+            this.closeExportModal();
+        });
+
+        // Close modal when clicking outside
+        this.elements.modal.addEventListener('click', (e) => {
+            if (e.target === this.elements.modal) {
+                this.closeExportModal();
+            }
+        });
+
+        // Copy to clipboard
+        this.elements.copyBtn.addEventListener('click', () => {
+            const text = this.elements.exportTextarea.value;
+            if (text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    console.log('📋 Copied to clipboard');
+                    const originalText = this.elements.copyBtn.innerHTML;
+                    this.elements.copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.elements.copyBtn.innerHTML = originalText;
+                    }, 2000);
+                });
+            }
         });
     }
 
@@ -131,6 +195,10 @@ class WebSocketRenderer {
                 return;
             }
 
+            // Store the original alphaTeX in local storage and memory
+            this.lastAlphaTeX = alphaTexContent;
+            this.saveToLocalStorage();
+
             // Wrap in standard AlphaTex metadata if not already wrapped
             let fullScore = alphaTexContent;
             if (!alphaTexContent.includes('\\title')) {
@@ -141,6 +209,7 @@ class WebSocketRenderer {
 
             // Render the notation
             if (this.alphaTabApi) {
+                console.log('🎼 Rendering notation: ' + fullScore);
                 this.alphaTabApi.tex(fullScore);
                 console.log('✅ Notation rendered');
                 this.showError(null);
@@ -165,19 +234,49 @@ class WebSocketRenderer {
         this.elements.infoUpdated.textContent = timeStr;
     }
 
-    toggleLoop() {
-        this.isLooping = !this.isLooping;
-        
-        if (this.alphaTabApi) {
-            // Set repeat mode
-            if (this.isLooping) {
-                this.elements.loopBtn.style.background = '#10b981';
-                console.log('🔁 Loop enabled');
-            } else {
-                this.elements.loopBtn.style.background = '#436d9d';
-                console.log('🔁 Loop disabled');
-            }
+    saveToLocalStorage() {
+        try {
+            const data = {
+                alphaTeX: this.lastAlphaTeX,
+                timestamp: new Date().toISOString(),
+                messageCount: this.messageCount
+            };
+            localStorage.setItem('alphatex_notation', JSON.stringify(data));
+            console.log('💾 Saved to local storage');
+        } catch (error) {
+            console.error('Failed to save to local storage:', error);
         }
+    }
+
+    loadFromLocalStorage() {
+        try {
+            const data = localStorage.getItem('alphatex_notation');
+            if (data) {
+                const parsed = JSON.parse(data);
+                this.lastAlphaTeX = parsed.alphaTeX || '';
+                console.log('📖 Loaded from local storage');
+                return parsed;
+            }
+        } catch (error) {
+            console.error('Failed to load from local storage:', error);
+        }
+        return null;
+    }
+
+    openExportModal() {
+        if (!this.lastAlphaTeX) {
+            this.showError('No notation data to export. Waiting for WebSocket messages...');
+            return;
+        }
+
+        this.elements.exportTextarea.value = this.lastAlphaTeX;
+        this.elements.modal.classList.add('show');
+        console.log('📂 Export modal opened');
+    }
+
+    closeExportModal() {
+        this.elements.modal.classList.remove('show');
+        console.log('📂 Export modal closed');
     }
 
     setStatus(status, text) {

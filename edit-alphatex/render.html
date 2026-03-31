@@ -211,6 +211,152 @@
             margin-right: 0.5rem;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 1.5rem;
+            overflow: auto;
+        }
+
+        #export-textarea {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: none;
+            color: #333;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .modal-btn-primary {
+            background: #436d9d;
+            color: white;
+            border-color: #436d9d;
+        }
+
+        .modal-btn-primary:hover {
+            background: #354a74;
+            border-color: #354a74;
+        }
+
+        @media (max-width: 640px) {
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            .modal-header {
+                padding: 1rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .modal-footer {
+                padding: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .modal-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
         @media (max-width: 1024px) {
             .render-controls {
                 padding: 0.75rem 1rem;
@@ -288,8 +434,8 @@
             <button class="control-btn" id="stop-btn" title="Stop notation">
                 <i class="fas fa-stop"></i> Stop
             </button>
-            <button class="control-btn" id="loop-btn" title="Toggle playback loop">
-                <i class="fas fa-repeat"></i> Loop
+            <button class="control-btn" id="export-btn" title="Export received notation">
+                <i class="fas fa-download"></i> Export
             </button>
         </div>
 
@@ -329,6 +475,25 @@
                     <div class="info-label">WebSocket URL</div>
                     <div class="info-value" id="info-url">ws://localhost:8080</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export AlphaTex Notation</h2>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="export-textarea" readonly placeholder="No notation data yet"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" id="copy-btn">
+                    <i class="fas fa-copy"></i> Copy to Clipboard
+                </button>
+                <button class="modal-btn modal-btn-primary" id="close-modal-btn">Close</button>
             </div>
         </div>
     </div>
