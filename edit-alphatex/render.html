@@ -119,6 +119,59 @@
             font-size: 1rem;
         }
 
+        .controls-separator {
+            width: 1px;
+            background: #e5e7eb;
+            margin: 0 0.5rem;
+        }
+
+        .command-btn {
+            background: #f59e0b;
+        }
+
+        .command-btn:hover {
+            background: #d97706;
+        }
+
+        .control-btn.active {
+            opacity: 1;
+            box-shadow: inset 0 0 0 2px #fff;
+        }
+
+        .control-slider {
+            flex: 0 0 80px;
+            height: 5px;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #436d9d;
+            cursor: pointer;
+        }
+
+        .control-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #436d9d;
+            border: none;
+            cursor: pointer;
+        }
+
+        .control-slider::-moz-range-track {
+            background: transparent;
+            border: none;
+        }
+
         .render-container {
             flex: 1;
             display: flex;
@@ -332,6 +385,93 @@
             border-color: #354a74;
         }
 
+        /* Floating Metronome Popup */
+        .metronome-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 500px;
+            height: 500px;
+            background: #fff;
+            border: 2px solid #436d9d;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .metronome-popup.active {
+            display: flex;
+        }
+
+        .metronome-popup.minimized {
+            display: flex;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            bottom: 20px;
+            right: 20px;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .metronome-popup.minimized .metronome-popup-header,
+        .metronome-popup.minimized .metronome-popup-content {
+            display: none;
+        }
+
+        .metronome-popup.minimized::after {
+            content: '♪';
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .metronome-popup-header {
+            background: #436d9d;
+            color: #fff;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 0 0 auto;
+        }
+
+        .metronome-popup-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .metronome-popup-minimize {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .metronome-popup-minimize:hover {
+            opacity: 1;
+        }
+
+        .metronome-popup-content {
+            flex: 1;
+            overflow: auto;
+        }
+
+        .metronome-popup-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         @media (max-width: 640px) {
             .modal-content {
                 width: 95%;
@@ -421,6 +561,9 @@
                 <div class="status-dot connecting" id="status-dot"></div>
                 <span id="status-text">Connecting...</span>
             </div>
+            <button id="metronome-btn" class="control-btn" title="Open Metronome" style="display:none; background: #f59e0b;">
+                <i class="fas fa-drum"></i>
+            </button>
         </header>
 
         <!-- Controls -->
@@ -437,6 +580,36 @@
             <button class="control-btn" id="export-btn" title="Export received notation">
                 <i class="fas fa-download"></i> Export
             </button>
+            
+            <!-- Command Controls -->
+            <div class="controls-separator"></div>
+            <button class="control-btn command-btn" id="clear-btn" title="Clear all notes">
+                <i class="fas fa-trash-alt"></i> Clear All
+            </button>
+            <!-- <button class="control-btn command-btn" id="undo-note-btn" title="Undo last note">
+                <i class="fas fa-undo"></i> Undo Note
+            </button> -->
+            <button class="control-btn command-btn" id="undo-bar-btn" title="Undo last bar">
+                <i class="fas fa-cubes"></i> Undo Bar
+            </button>
+            
+            <!-- Metronome Toggle -->
+            <div class="controls-separator"></div>
+            <button class="control-btn" id="metronome-toggle-btn" title="Toggle Metronome">
+                <i class="fas fa-drum"></i> Metronome
+            </button>
+            
+            <!-- BPM Controls -->
+            <div style="display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 4px;">
+                <button id="btn-bpm-minus" class="control-btn" style="width: 28px; height: 28px; font-size: 12px; padding: 0;" title="Decrease BPM">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input type="range" id="bpm-slider" class="control-slider" min="40" max="300" value="120" title="BPM">
+                <button id="btn-bpm-plus" class="control-btn" style="width: 28px; height: 28px; font-size: 12px; padding: 0;" title="Increase BPM">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <input type="number" id="bpm-input" min="40" max="300" value="120" style="width: 50px; height: 28px; padding: 0 4px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; color: #333; font-size: 12px; text-align: center;" title="BPM">
+            </div>
         </div>
 
         <!-- Render Area -->
@@ -495,6 +668,19 @@
                 </button>
                 <button class="modal-btn modal-btn-primary" id="close-modal-btn">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Metronome Popup -->
+    <div class="metronome-popup" id="metronome-popup">
+        <div class="metronome-popup-header">
+            <h3>Metronome</h3>
+            <button class="metronome-popup-minimize" id="metronome-popup-minimize" type="button">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="metronome-popup-content">
+            <iframe id="metronome-iframe" frameborder="0" style="width: 100%; height: 100%;"></iframe>
         </div>
     </div>
 
